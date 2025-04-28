@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Embedded Shopify App</title>
+  <script src="https://cdn.jsdelivr.net/npm/jquery"></script>
+</head>
+<body>
+  <h1>Shopify Embedded App</h1>
+  <h2>yay it works!</h2>
+  <div id="products"></div>
+
+  <script>
+  $(document).ready(function() {
+    const shop = new URLSearchParams(window.location.search).get('shop');
+
+    if (!shop) {
+      alert('Missing shop parameter');
+      return;
+    }
+
+    $.get(`/api/products?shop=${shop}`, function(data) {
+      $('#products').html('<pre>' + JSON.stringify(data, null, 2) + '</pre>');
+    }).fail(function(err) {
+      console.error('API call failed:', err);
+      $('#products').html('<p>Failed to load products.</p>');
+    });
+  });
+  </script>
+</body>
+</html>
