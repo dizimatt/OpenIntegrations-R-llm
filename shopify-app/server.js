@@ -8,12 +8,12 @@ const cookieParser = require('cookie-parser');
 
 const authRoutes = require('./routes/auth');
 const apiRoutes = require('./routes/api');
+const llmRoutes = require('./routes/llm'); // Add LLM routes
 
 const app = express();
 
 connectMongo();
 
-//app.use(helmet());
 app.use(helmet({
   contentSecurityPolicy: false,
   frameguard: false,
@@ -40,16 +40,27 @@ app.use(express.static('public'));
 
 app.use('/auth', authRoutes);
 app.use('/api', apiRoutes);
-
-/*
-app.get('/embedded', (req, res) => {
-  res.sendFile(__dirname + '/views/embedded.html');
-});
-*/
+app.use('/api/llm', llmRoutes); // Add LLM routes
 
 app.get('/embedded', (req, res) => {
   console.log('Incoming /embedded request query:', req.query);
   const shop = req.query.shop;
+  /*
+  // removing all of this for now...
+            $.get('/api/products?shop=' + shop, function(data) {
+              $('#products').html('<h2>Products</h2><pre>' + JSON.stringify(data, null, 2) + '</pre>');
+            }).fail(function(err) {
+              console.error('API call failed:', err);
+              $('#products').html('<p>Failed to load products.</p>');
+            });
+            
+            $.get('/api/orders?shop=' + shop, function(data) {
+              $('#orders').html('<h2>Orders</h2><pre>' + JSON.stringify(data, null, 2) + '</pre>');
+            }).fail(function(err) {
+              console.error('API call failed:', err);
+              $('#orders').html('<p>Failed to load orders.</p>');
+            });
+  */
   res.send(`
     <!DOCTYPE html>
     <html>
@@ -63,6 +74,12 @@ app.get('/embedded', (req, res) => {
 
         <div id="products">Loading products...</div>
         <div id="orders">Loading orders...</div>
+        <div id="llm-test">
+          <h2>LLM Test</h2>
+          <input type="text" id="llm-query" placeholder="Ask something...">
+          <button onclick="askLLM()">Ask LLM</button>
+          <div id="llm-response"></div>
+        </div>
 
         <script>
           const shop = '${shop}';
@@ -73,19 +90,36 @@ app.get('/embedded', (req, res) => {
               return;
             }
 
-            $.get('/api/products?shop=' + shop, function(data) {
-              $('#products').html('<h2>Products</h2><pre>' + JSON.stringify(data, null, 2) + '</pre>');
-            }).fail(function(err) {
-              console.error('API call failed:', err);
-              $('#products').html('<p>Failed to load products.</p>');
-            });
-            $.get('/api/orders?shop=' + shop, function(data) {
-              $('#orders').html('<h2>Orders</h2><pre>' + JSON.stringify(data, null, 2) + '</pre>');
-            }).fail(function(err) {
-              console.error('API call failed:', err);
-              $('#orders').html('<p>Failed to load orders.</p>');
-            });
           });
+
+          function askLLM() {
+            const query = $('#llm-query').val();
+            if (!query) return;
+
+            $('#llm-response').html('Thinking...');
+
+            $.ajax({
+              url: '/api/llm/chat',
+              method: 'POST',
+              data: JSON.stringify({
+                query: query,
+                provider: 'openai', // or 'claude'
+                context: {
+                  systemPrompt: 'You are a helpful assistant for a Shopify store.',
+                  temperature: 0.7
+                },
+                shop: shop
+              }),
+              contentType: 'application/json',
+              success: function(data) {
+                $('#llm-response').html('<p><strong>Response:</strong></p><p>' + data.response + '</p>');
+              },
+              error: function(err) {
+                console.error('LLM API call failed:', err);
+                $('#llm-response').html('<p>Failed to get response.</p>');
+              }
+            });
+          }
         </script>
       </body>
     </html>
@@ -100,7 +134,6 @@ app.get('/', (req, res) => {
   console.log('shop %s:', shop);
   res.redirect(`/embedded?shop=${shop}`);
 });
-
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
