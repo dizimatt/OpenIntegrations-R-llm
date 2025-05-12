@@ -103,7 +103,7 @@ app.get('/embedded', (req, res) => {
               method: 'POST',
               data: JSON.stringify({
                 query: query,
-                provider: 'openai', // or 'claude'
+                provider: 'claude', // or 'openai'
                 context: {
                   systemPrompt: 'You are a helpful assistant for a Shopify store.',
                   temperature: 0.7
