@@ -87,14 +87,14 @@ exports.getOrders = async (req, res) => {
   const session = await Session.findOne({ shop: req.query.shop });
   if (!session) return res.status(401).send('Unauthorized');
 
-  const query = `                                                   
-    {                           
-      orders(first: 10) {                                     
+  const query = `
+    {
+      orders(first: 10) {
         edges {
           node {
             id
             name
-            totalPriceSet {                                                                           
+            totalPriceSet {
               shopMoney {
                 amount
                 currencyCode

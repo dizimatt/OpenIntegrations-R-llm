@@ -177,14 +177,10 @@
         let html = '';
         data.orders.edges.forEach(edge => {
           const order = edge.node;
-          const financialStatusTag = getFinancialStatusTag(order.financialStatus);
-          const fulfillmentStatusTag = getFulfillmentStatusTag(order.fulfillmentStatus);
           
           html += '<div class="card">' +
             '<div class="card-header">' +
             order.name + ' ' + 
-            financialStatusTag +
-            fulfillmentStatusTag +
             '</div>' +
             '<div class="card-body">' +
             '<p>Date: ' + new Date(order.createdAt).toLocaleString() + '</p>' +
@@ -244,33 +240,7 @@
         }
       }
 
-      function getFinancialStatusTag(status) {
-        if (!status) return '<span class="tag tag-unpaid">Pending</span>';
-        
-        switch(status.toLowerCase()) {
-          case 'paid':
-            return '<span class="tag tag-paid">Paid</span>';
-          case 'refunded':
-            return '<span class="tag tag-partial">Refunded</span>';
-          case 'partially_refunded':
-            return '<span class="tag tag-partial">Partially Refunded</span>';
-          default:
-            return '<span class="tag tag-unpaid">' + status + '</span>';
-        }
-      }
-
-      function getFulfillmentStatusTag(status) {
-        if (!status) return '<span class="tag tag-unfulfilled">Unfulfilled</span>';
-        
-        switch(status.toLowerCase()) {
-          case 'fulfilled':
-            return '<span class="tag tag-fulfilled">Fulfilled</span>';
-          case 'partial':
-            return '<span class="tag tag-partial">Partially Fulfilled</span>';
-          default:
-            return '<span class="tag tag-unfulfilled">' + status + '</span>';
-        }
-      }
+      // Note: Financial and fulfillment status tags removed as these fields aren't available in the current GraphQL schema
 
       function askLLM() {
         const query = $('#llm-query').val();
