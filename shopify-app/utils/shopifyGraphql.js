@@ -8,6 +8,11 @@ const shopifyGraphql = async (shop, accessToken, query) => {
       'Content-Type': 'application/json',
     },
   });
+  if (response.data.errors && response.data.errors.length > 0) {
+    console.error('GraphQL errors: %o', response.data.errors);
+    return null;
+  }
+
   return response.data.data;
 };
 

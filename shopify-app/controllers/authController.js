@@ -19,13 +19,36 @@ const buildHmac = (query) => {
     .digest('hex');
 };
 
-// New function to start auth
+// Start the initial auth flow
 exports.startAuth = (req, res) => {
   const { shop } = req.query;
   if (!shop) {
     return res.status(400).send('Missing shop parameter');
   }
 
+  const redirectUri = `${process.env.APP_URL}/auth/callback`;
+  const installUrl = `https://${shop}/admin/oauth/authorize?client_id=${apiKey}&scope=${scopes}&redirect_uri=${redirectUri}`;
+
+  res.redirect(installUrl);
+};
+
+// Re-authentication flow - used when new scopes are needed
+exports.startReauth = async (req, res) => {
+  const { shop } = req.query;
+  if (!shop) {
+    return res.status(400).send('Missing shop parameter');
+  }
+
+  // Check if the shop has an existing session
+  const session = await Session.findOne({ shop });
+  if (session) {
+    console.log(`Re-authenticating shop ${shop} to get updated scopes`);
+    
+    // Delete the old session to force a new one to be created
+    await Session.deleteOne({ shop });
+  }
+
+  // Start the normal auth flow
   const redirectUri = `${process.env.APP_URL}/auth/callback`;
   const installUrl = `https://${shop}/admin/oauth/authorize?client_id=${apiKey}&scope=${scopes}&redirect_uri=${redirectUri}`;
 
