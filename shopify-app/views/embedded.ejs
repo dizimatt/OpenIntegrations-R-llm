@@ -195,13 +195,13 @@
       }
 
       function displayActiveCarts(data) {
-        if (!data || !data.checkouts || !data.checkouts.edges || !data.checkouts.edges.length) {
+        if (!data || !data.carts || !data.carts.edges || !data.carts.edges.length) {
           $('#carts').html('<p>No active carts found.</p>');
           return;
         }
 
         let html = '';
-        data.checkouts.edges.forEach(edge => {
+        data.carts.edges.forEach(edge => {
           const cart = edge.node;
           
           // Calculate total items
@@ -217,7 +217,7 @@
           
           html += '<div class="card">' +
             '<div class="card-header">' +
-            'Cart ID: ' + cart.id.split('/').pop() +
+            (cart.name || 'Draft Order') + ' ' +
             '<span class="tag tag-active">Active</span>' +
             '</div>' +
             '<div class="card-body">' +
@@ -226,9 +226,8 @@
             '<p>Items: ' + totalItems + ' (' + cart.lineItems.edges.length + ' unique)</p>' +
             '<p>Customer: ' + (cart.customer ? (cart.customer.firstName + ' ' + cart.customer.lastName) : 'Anonymous') + '</p>' +
             '<p>Email: ' + (cart.customer ? cart.customer.email : 'N/A') + '</p>' +
-            '<p>Subtotal: ' + (cart.subtotalPriceSet ? cart.subtotalPriceSet.shopMoney.amount + ' ' + cart.subtotalPriceSet.shopMoney.currencyCode : 'N/A') + '</p>' +
-            '<p>Total: ' + (cart.totalPriceSet ? cart.totalPriceSet.shopMoney.amount + ' ' + cart.totalPriceSet.shopMoney.currencyCode : 'N/A') + '</p>' +
-            (cart.webUrl ? '<p><a href="' + cart.webUrl + '" target="_blank">View Cart</a></p>' : '') +
+            '<p>Subtotal: ' + (cart.subtotalPrice || '0.00') + ' ' + (cart.currencyCode || 'USD') + '</p>' +
+            '<p>Total: ' + (cart.totalPrice || '0.00') + ' ' + (cart.currencyCode || 'USD') + '</p>' +
             '</div>' +
             '</div>';
         });

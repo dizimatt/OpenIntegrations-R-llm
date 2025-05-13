@@ -133,28 +133,32 @@ exports.getActiveCarts = async (req, res) => {
     const session = await Session.findOne({ shop: req.query.shop });
     if (!session) return res.status(401).send('Unauthorized');
 
-    // Query for active carts - those that have been updated recently and not completed
+    // Query for active carts using draftOrders (since checkouts is no longer available)
     const query = `
       {
-        checkouts(first: 20, sortKey: UPDATED_AT, reverse: true) {
+        draftOrders(first: 20, sortKey: UPDATED_AT, reverse: true) {
           edges {
             node {
               id
-              completedAt
+              name
               createdAt
               updatedAt
-              totalPriceSet {
-                shopMoney {
-                  amount
-                  currencyCode
-                }
+              totalPrice
+              subtotalPrice
+              currencyCode
+              customer {
+                firstName
+                lastName
+                email
               }
               lineItems(first: 20) {
                 edges {
                   node {
                     title
                     quantity
+                    originalUnitPrice
                     variant {
+                      title
                       price
                       product {
                         title
@@ -163,29 +167,12 @@ exports.getActiveCarts = async (req, res) => {
                   }
                 }
               }
-              customer {
-                firstName
-                lastName
-                email
-              }
               shippingAddress {
                 address1
                 city
                 country
               }
-              subtotalPriceSet {
-                shopMoney {
-                  amount
-                  currencyCode
-                }
-              }
-              totalTaxSet {
-                shopMoney {
-                  amount
-                  currencyCode
-                }
-              }
-              webUrl
+              status
             }
           }
           pageInfo {
@@ -205,20 +192,26 @@ exports.getActiveCarts = async (req, res) => {
         return res.status(result.status).json(result.response);
       }
       
-      // Filter to only include active carts (those that haven't been completed)
-      // and were updated within the last 24 hours
-      const oneDayAgo = new Date();
-      oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+      // Filter to only include active draft orders
+      // (those that were updated within the last 7 days)
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
       
-      if (result.data && result.data.checkouts && result.data.checkouts.edges) {
-        result.data.checkouts.edges = result.data.checkouts.edges.filter(edge => {
-          const checkout = edge.node;
-          const isNotCompleted = !checkout.completedAt;
-          const updatedDate = new Date(checkout.updatedAt);
-          const isRecent = updatedDate > oneDayAgo;
+      if (result.data && result.data.draftOrders && result.data.draftOrders.edges) {
+        result.data.draftOrders.edges = result.data.draftOrders.edges.filter(edge => {
+          const draftOrder = edge.node;
+          const updatedDate = new Date(draftOrder.updatedAt);
+          const isRecent = updatedDate > oneWeekAgo;
           
-          return isNotCompleted && isRecent;
+          // Consider it active if it's recent and not completed/archived
+          return isRecent && draftOrder.status !== 'COMPLETED';
         });
+      }
+      
+      // Rename the response field from draftOrders to carts for frontend compatibility
+      if (result.data && result.data.draftOrders) {
+        result.data.carts = result.data.draftOrders;
+        delete result.data.draftOrders;
       }
       
       res.json(result.data);
