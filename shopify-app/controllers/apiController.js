@@ -133,7 +133,7 @@ exports.getActiveCarts = async (req, res) => {
     const session = await Session.findOne({ shop: req.query.shop });
     if (!session) return res.status(401).send('Unauthorized');
 
-    // Query for active carts using draftOrders (since checkouts is no longer available)
+    // Query for all active draft orders (which represent carts)
     const query = `
       {
         draftOrders(first: 20, sortKey: UPDATED_AT, reverse: true) {
@@ -185,6 +185,7 @@ exports.getActiveCarts = async (req, res) => {
 
     try {
       const data = await shopifyGraphql(session.shop, session.accessToken, query);
+      console.log('Draft orders data:', data);
       
       // Handle potential GraphQL errors
       const result = handleGraphQLResponse(data, 'carts');
@@ -192,23 +193,15 @@ exports.getActiveCarts = async (req, res) => {
         return res.status(result.status).json(result.response);
       }
       
-      // Filter to only include active draft orders
-      // (those that were updated within the last 7 days)
-      const oneWeekAgo = new Date();
-      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-      
-      /*
+      // Filter to only include non-completed draft orders
       if (result.data && result.data.draftOrders && result.data.draftOrders.edges) {
         result.data.draftOrders.edges = result.data.draftOrders.edges.filter(edge => {
           const draftOrder = edge.node;
-          const updatedDate = new Date(draftOrder.updatedAt);
-          const isRecent = updatedDate > oneWeekAgo;
-          
-          // Consider it active if it's recent and not completed/archived
-          return isRecent && draftOrder.status !== 'COMPLETED';
+          console.log('Draft order:', draftOrder);
+          // Only filter out completed draft orders
+          return true; //draftOrder.status !== 'COMPLETED';
         });
       }
-      */
       
       // Rename the response field from draftOrders to carts for frontend compatibility
       if (result.data && result.data.draftOrders) {
