@@ -197,6 +197,7 @@ exports.getActiveCarts = async (req, res) => {
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
       
+      /*
       if (result.data && result.data.draftOrders && result.data.draftOrders.edges) {
         result.data.draftOrders.edges = result.data.draftOrders.edges.filter(edge => {
           const draftOrder = edge.node;
@@ -207,6 +208,7 @@ exports.getActiveCarts = async (req, res) => {
           return isRecent && draftOrder.status !== 'COMPLETED';
         });
       }
+      */
       
       // Rename the response field from draftOrders to carts for frontend compatibility
       if (result.data && result.data.draftOrders) {

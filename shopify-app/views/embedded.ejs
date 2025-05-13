@@ -230,7 +230,8 @@
             '<p>Total: ' + (cart.totalPrice || '0.00') + ' ' + (cart.currencyCode || 'USD') + '</p>' +
             '</div>' +
             '</div>';
-        });
+            console.log('Cart line items: %o', cart.lineItems);
+          });
 
         if (html === '') {
           $('#carts').html('<p>No active carts found.</p>');
