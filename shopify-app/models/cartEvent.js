@@ -17,7 +17,7 @@ const CartEventSchema = new mongoose.Schema({
   },
   event: {
     type: String,
-    enum: ['created', 'updated', 'completed'],
+    enum: ['created', 'updated', 'completed', 'system_adjusted'],
     default: 'updated'
   },
   lineItems: [{
@@ -35,6 +35,19 @@ const CartEventSchema = new mongoose.Schema({
   },
   totalPrice: Number,
   subtotalPrice: Number,
+  // New field for mutation information
+  mutationInfo: {
+    reason: String,
+    itemsBefore: Number,
+    itemsAfter: Number,
+    adjustmentDetails: [{
+      title: String,
+      originalQuantity: Number,
+      newQuantity: Number,
+      reduction: Number
+    }],
+    timestamp: Date
+  },
   createdAt: { 
     type: Date, 
     default: Date.now 
