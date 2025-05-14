@@ -10,6 +10,8 @@ const path = require('path');
 const authRoutes = require('./routes/auth');
 const apiRoutes = require('./routes/api');
 const llmRoutes = require('./routes/llm');
+const webhookRoutes = require('./routes/webhooks');
+const cartEventsRoutes = require('./routes/cartEvents');
 
 const app = express();
 
@@ -46,6 +48,8 @@ app.use(express.static('public'));
 app.use('/auth', authRoutes);
 app.use('/api', apiRoutes);
 app.use('/api/llm', llmRoutes);
+app.use('/webhooks', webhookRoutes);
+app.use('/api/cart-events', cartEventsRoutes);
 
 // Render the embedded dashboard using EJS
 app.get('/embedded', (req, res) => {

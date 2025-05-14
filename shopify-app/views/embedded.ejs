@@ -101,11 +101,62 @@
         width: 100%;
         max-width: 300px;
       }
+      .webhooks-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+      
+      .webhooks-table th, .webhooks-table td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+      
+      .webhooks-table th {
+        background-color: #f4f6f8;
+        font-weight: 500;
+      }
+      
+      .btn-primary {
+        background-color: #5c6ac4;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        margin-bottom: 15px;
+      }
+      
+      .delete-webhook {
+        background-color: #fbeae5;
+        color: #de3618;
+        border: 1px solid #de3618;
+        padding: 4px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+      }
     </style>
   </head>
   <body>
     <h1>Shopify Embedded App Dashboard</h1>
     <h2>Shop: <%= shop %></h2>
+    
+    <div class="section" id="webhooks-section">
+      <h2>Webhook Management</h2>
+      <div class="card">
+        <div class="card-header">
+          Cart Update Webhooks
+        </div>
+        <div class="card-body">
+          <p>Register webhooks to receive cart update notifications.</p>
+          <button id="register-webhooks" class="btn-primary">Register Webhooks</button>
+          <div id="webhooks-status" class="loading">Loading webhooks...</div>
+        </div>
+      </div>
+    </div>
 
     <div class="container">
       <div class="section">
@@ -137,6 +188,29 @@
           return;
         }
 
+        // Load webhooks
+        loadWebhooks();
+    
+        // Register webhooks button
+        $('#register-webhooks').on('click', function() {
+          $(this).prop('disabled', true).text('Registering...');
+          
+          $.get('/webhooks/register?shop=' + shop, function(data) {
+            if (data.success) {
+              alert('Webhooks registered successfully!');
+              loadWebhooks();
+            } else {
+              alert('Error registering webhooks');
+              console.error(data);
+            }
+            $('#register-webhooks').prop('disabled', false).text('Register Webhooks');
+          }).fail(function(err) {
+            alert('Error registering webhooks');
+            console.error(err);
+            $('#register-webhooks').prop('disabled', false).text('Register Webhooks');
+          });
+        });
+
         // Fetch orders
         $.get('/api/orders?shop=' + shop, function(data) {
           displayOrders(data);
@@ -167,6 +241,58 @@
           }
         });
       });
+      function loadWebhooks() {
+        $('#webhooks-status').html('<p>Loading webhooks...</p>');
+        
+        $.get('/webhooks/list?shop=' + shop, function(data) {
+          if (data.webhooks && data.webhooks.length > 0) {
+            let html = '<table class="webhooks-table">' +
+                      '<tr><th>Topic</th><th>Address</th><th>Created</th><th>Actions</th></tr>';
+            
+            data.webhooks.forEach(webhook => {
+              const createdDate = new Date(webhook.createdAt).toLocaleString();
+              html += '<tr>' +
+                      '<td>' + webhook.topic + '</td>' +
+                      '<td>' + webhook.address + '</td>' +
+                      '<td>' + createdDate + '</td>' +
+                      '<td><button class="delete-webhook" data-id="' + webhook.webhookId + '">Delete</button></td>' +
+                      '</tr>';
+            });
+            
+            html += '</table>';
+            $('#webhooks-status').html(html);
+            
+            // Attach delete handlers
+            $('.delete-webhook').on('click', function() {
+              const webhookId = $(this).data('id');
+              deleteWebhook(webhookId);
+            });
+          } else {
+            $('#webhooks-status').html('<p>No webhooks registered yet.</p>');
+          }
+        }).fail(function(err) {
+          $('#webhooks-status').html('<p>Error loading webhooks.</p>');
+          console.error(err);
+        });
+      }
+      
+      function deleteWebhook(webhookId) {
+        if (confirm('Are you sure you want to delete this webhook?')) {
+          $.ajax({
+            url: '/webhooks/' + webhookId + '?shop=' + shop,
+            type: 'DELETE',
+            success: function(data) {
+              alert('Webhook deleted successfully');
+              loadWebhooks();
+            },
+            error: function(err) {
+              alert('Error deleting webhook');
+              console.error(err);
+            }
+          });
+        }
+      }
+      // end of webhooks
 
       function displayOrders(data) {
         if (!data || !data.orders || !data.orders.edges || !data.orders.edges.length) {
