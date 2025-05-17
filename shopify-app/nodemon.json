@@ -1,0 +1,20 @@
+{
+    "watch": [
+      "server.js",
+      "routes/**/*.js",
+      "controllers/**/*.js",
+      "models/**/*.js",
+      "utils/**/*.js",
+      "config/**/*.js",
+      "views/**/*.ejs",
+      "public/**/*.js"
+    ],
+    "ignore": [
+      "node_modules",
+      ".git",
+      "public/vendor"
+    ],
+    "ext": "js,json,ejs",
+    "delay": "500",
+    "verbose": true
+  }

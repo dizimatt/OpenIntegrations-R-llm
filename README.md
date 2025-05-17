@@ -28,4 +28,3 @@ This is a **public Shopify app** built with:
 ├── certs/                 # Your SSL certs go here
 ├── .env                   # Environment variables
 └── package.json           # Node dependencies
- # forced commit - for tag

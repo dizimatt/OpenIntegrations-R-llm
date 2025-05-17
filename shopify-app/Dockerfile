@@ -2,12 +2,13 @@ FROM node:18
 
 WORKDIR /app
 
+# Install nodemon globally
+RUN npm install -g nodemon
+
 # COPY package*.json ./
 # RUN npm install
 
-# COPY . .
-
 EXPOSE 3000
 
-# CMD ["/bin/bash", "-c", "npm install; npm start"]
-# CMD ["npm", "start"]
+# Using nodemon for automatic restarts
+# CMD ["nodemon", "--inspect=0.0.0.0:9229", "server.js"]

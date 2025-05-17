@@ -22,8 +22,7 @@ services:
       - mongo
     volumes:
       - .:/app
-    command: sh -c "npm install; npm start"
-
+    command: sh -c "npm install && npm run dev"
 
 #  nginx:
 #    image: nginx:alpine
