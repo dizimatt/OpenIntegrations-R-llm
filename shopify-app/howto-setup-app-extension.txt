@@ -1,0 +1,18 @@
+### added a new line of blurb - jut to test out the branch processes...
+ensure shopify-cli is installed 
+navigate to app folder
+if .toml file doesn't exist...
+$ shopify app config link
+
+still within app folder...
+$ shopify app generate extension
+Type of extension?
+✔  Theme app extension
+
+still within app folder...
+$ shopify app dev
+
+may need to $ sudo gem install bundler
+
+to deploy the app extension:
+$ shopify app deploy
