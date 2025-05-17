@@ -3,7 +3,7 @@
 client_id = "08391e88586e17eac0b3b12b64f6d738"
 name = "ai-openintegrations-test"
 handle = "ai-openintegrations-test"
-application_url = "https://de3a-2a02-6ea0-ce14-3036-00-12.ngrok-free.app/auth"
+application_url = "https://00bc-2001-e68-540b-3c90-195c-cc86-a283-ca0d.ngrok-free.app/auth"
 embedded = true
 
 [webhooks]
@@ -11,8 +11,8 @@ api_version = "2025-04"
 
 [auth]
 redirect_urls = [
-  "https://de3a-2a02-6ea0-ce14-3036-00-12.ngrok-free.app/auth",
-  "https://de3a-2a02-6ea0-ce14-3036-00-12.ngrok-free.app/auth/callback"
+  "https://00bc-2001-e68-540b-3c90-195c-cc86-a283-ca0d.ngrok-free.app/auth",
+  "https://00bc-2001-e68-540b-3c90-195c-cc86-a283-ca0d.ngrok-free.app/auth/callback"
 ]
 
 [pos]
